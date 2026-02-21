@@ -2,30 +2,46 @@ const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
 const compression = require("compression");
-const morgan = require("morgan");
 
-const logger = require("./config/logger");
+const requestId = require("./middlewares/requestId");
+const loggerMiddleware = require("./middlewares/loggerMiddleware");
+const globalRateLimiter = require("./middlewares/globalRateLimiter");
+const analyticsMiddleware = require("./middlewares/analyticsMiddleware");
+const errorHandler = require("./middlewares/errorHandler");
 
-const app = express();
+const app = express(); // ✅ IMPORTANT
 
-// Security middleware
+// ------------------
+// Core Middlewares
+// ------------------
 app.use(helmet());
 app.use(cors());
 app.use(compression());
 
-// Body parser
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
-// HTTP request logging
-app.use(morgan("combined"));
+// ------------------
+// Custom Middlewares
+// ------------------
+app.use(requestId);
+app.use(loggerMiddleware);
+app.use(globalRateLimiter);
+app.use(analyticsMiddleware("global"));
 
-// Health check
+// ------------------
+// Routes
+// ------------------
 app.get("/health", (req, res) => {
-  res.status(200).json({
-    status: "OK",
-    uptime: process.uptime(),
-  });
+    res.json({
+        status: "OK",
+        request_id: req.requestId,
+    });
 });
+
+// ------------------
+// Error Handler
+// ------------------
+// app.use(errorHandler);
 
 module.exports = app;
