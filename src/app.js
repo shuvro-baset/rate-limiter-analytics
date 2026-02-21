@@ -39,6 +39,10 @@ app.get("/health", (req, res) => {
     });
 });
 
+const limiterRoutes = require("./routes/limiterRoutes");
+
+app.use("/api", limiterRoutes);
+
 // ------------------
 // Error Handler
 // ------------------
