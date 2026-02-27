@@ -41,8 +41,11 @@ app.get("/health", (req, res) => {
 
 const limiterRoutes = require("./routes/limiterRoutes");
 
+const analyticsRoutes = require("./routes/analyticsRoutes");
+
 app.use("/api", limiterRoutes);
 
+app.use("/analytics", analyticsRoutes);
 // ------------------
 // Error Handler
 // ------------------
