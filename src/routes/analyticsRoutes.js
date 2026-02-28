@@ -3,6 +3,7 @@ const router = express.Router();
 
 const AnalyticsController = require("../controllers/analyticsController");
 
+router.get("/ping", (req, res) => res.json({ ok: true }));
 router.get("/overall", AnalyticsController.overall);
 router.get("/browsers", AnalyticsController.browsers);
 router.get("/algorithms", AnalyticsController.algorithms);

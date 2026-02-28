@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rate Limiter Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/dashboard/styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-icon" aria-hidden="true">⚡</span>
+        <span class="brand-text">Rate Limiter</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard" class="nav-link active" data-page="overview">
+          <span class="nav-icon" aria-hidden="true">◉</span>
+          Overview
+        </a>
+        <div class="nav-section-label">Algorithms</div>
+        <a href="/dashboard/algorithm/global" class="nav-link" data-algorithm="global">Global</a>
+        <a href="/dashboard/algorithm/fixed" class="nav-link" data-algorithm="fixed">Fixed Window</a>
+        <a href="/dashboard/algorithm/sliding-log" class="nav-link" data-algorithm="sliding-log">Sliding Log</a>
+        <a href="/dashboard/algorithm/sliding-counter" class="nav-link" data-algorithm="sliding-counter">Sliding Counter</a>
+        <a href="/dashboard/algorithm/token-bucket" class="nav-link" data-algorithm="token-bucket">Token Bucket</a>
+        <a href="/dashboard/algorithm/leaky-bucket" class="nav-link" data-algorithm="leaky-bucket">Leaky Bucket</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="header">
+        <div class="header-left">
+          <h1 class="page-title" id="pageTitle">Analytics Overview</h1>
+          <p class="page-subtitle" id="pageSubtitle">All algorithms</p>
+        </div>
+        <div class="header-actions">
+          <label class="filter-label" for="algorithmFilter">Filter by algorithm</label>
+          <select id="algorithmFilter" class="filter-select" aria-label="Filter by algorithm">
+            <option value="">All algorithms</option>
+            <option value="global">Global</option>
+            <option value="fixed">Fixed Window</option>
+            <option value="sliding-log">Sliding Log</option>
+            <option value="sliding-counter">Sliding Counter</option>
+            <option value="token-bucket">Token Bucket</option>
+            <option value="leaky-bucket">Leaky Bucket</option>
+          </select>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="state state-loading" id="stateLoading" role="status" aria-live="polite">
+          <div class="spinner" aria-hidden="true"></div>
+          <p>Loading analytics…</p>
+        </div>
+        <div class="state state-error" id="stateError" role="alert" hidden>
+          <span class="error-icon" aria-hidden="true">!</span>
+          <p id="errorMessage">Failed to load data.</p>
+          <button type="button" class="btn-retry" id="retryBtn">Retry</button>
+        </div>
+        <div class="state state-ready" id="stateReady" hidden>
+          <section class="kpi-cards" aria-label="Key metrics">
+            <div class="kpi-card">
+              <span class="kpi-label">Total Requests</span>
+              <span class="kpi-value" id="kpiTotalRequests">—</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">Unique IPs</span>
+              <span class="kpi-value" id="kpiUniqueIps">—</span>
+            </div>
+          </section>
+
+          <section class="charts" aria-label="Charts">
+            <div class="chart-card chart-card--half">
+              <h2 class="chart-title">Browser Distribution</h2>
+              <div class="chart-wrap">
+                <canvas id="chartBrowsers" role="img" aria-label="Bar chart of requests by browser"></canvas>
+              </div>
+            </div>
+            <div class="chart-card chart-card--half" id="algorithmChartCard">
+              <h2 class="chart-title">Algorithm Distribution</h2>
+              <div class="chart-wrap">
+                <canvas id="chartAlgorithms" role="img" aria-label="Pie chart of requests by algorithm"></canvas>
+              </div>
+            </div>
+            <div class="chart-card chart-card--full">
+              <h2 class="chart-title">Hourly Requests</h2>
+              <div class="chart-wrap">
+                <canvas id="chartHourly" role="img" aria-label="Line chart of requests per hour"></canvas>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+  <script src="/dashboard/app.js"></script>
+</body>
+</html>

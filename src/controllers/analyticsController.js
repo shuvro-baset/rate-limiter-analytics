@@ -1,9 +1,12 @@
 const AnalyticsService = require("../services/analyticsService");
 
+const ALGORITHM_PARAM = "algorithm";
+
 class AnalyticsController {
   static async overall(req, res, next) {
     try {
-      const data = await AnalyticsService.getOverallStats();
+      const algorithm = req.query[ALGORITHM_PARAM] || null;
+      const data = await AnalyticsService.getOverallStats(algorithm);
       res.json(data);
     } catch (err) {
       next(err);
@@ -12,7 +15,8 @@ class AnalyticsController {
 
   static async browsers(req, res, next) {
     try {
-      const data = await AnalyticsService.getBrowserStats();
+      const algorithm = req.query[ALGORITHM_PARAM] || null;
+      const data = await AnalyticsService.getBrowserStats(algorithm);
       res.json(data);
     } catch (err) {
       next(err);
@@ -30,7 +34,8 @@ class AnalyticsController {
 
   static async hourly(req, res, next) {
     try {
-      const data = await AnalyticsService.getHourlyStats();
+      const algorithm = req.query[ALGORITHM_PARAM] || null;
+      const data = await AnalyticsService.getHourlyStats(algorithm);
       res.json(data);
     } catch (err) {
       next(err);
