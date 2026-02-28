@@ -1,0 +1,35 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment and secrets (use docker-compose env or .env at runtime)
+.env
+.env.*
+!.env.example
+
+# Git
+.git
+.gitignore
+
+# IDE and OS
+.idea
+.vscode
+.DS_Store
+*.log
+
+# Tests and coverage
+coverage
+.nyc_output
+*.test.js
+*.spec.js
+__tests__
+
+# Docs and misc
+README.md
+COMMIT_MSG.txt
+*.md
+!package.json
+!package-lock.json
