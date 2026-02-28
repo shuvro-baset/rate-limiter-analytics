@@ -199,9 +199,14 @@
     const labels = list.map((d) => (d && d.browser) ? d.browser : "Unknown");
     const values = list.map((d) => (d && typeof d.total === "number") ? d.total : 0);
 
+    const barColors = labels.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]);
+    const barColorsAlpha = barColors.map((c) => c + "99");
+
     if (state.charts.browsers) {
       state.charts.browsers.data.labels = labels;
       state.charts.browsers.data.datasets[0].data = values;
+      state.charts.browsers.data.datasets[0].backgroundColor = barColorsAlpha;
+      state.charts.browsers.data.datasets[0].borderColor = barColors;
       state.charts.browsers.update("none");
       return;
     }
@@ -216,8 +221,8 @@
         datasets: [{
           label: "Requests",
           data: values,
-          backgroundColor: CHART_COLORS[0] + "99",
-          borderColor: CHART_COLORS[0],
+          backgroundColor: barColorsAlpha,
+          borderColor: barColors,
           borderWidth: 1,
         }],
       },
