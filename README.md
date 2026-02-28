@@ -12,7 +12,7 @@ A production-ready **rate limiting** implementation with multiple algorithms (Fi
 - [API Reference](#api-reference)
 - [Analytics Dashboard](#analytics-dashboard)
 - [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
+- [Installation](#installation)
 - [Environment Variables](#environment-variables)
 - [Screenshots](#screenshots)
 
@@ -157,56 +157,121 @@ rate-limiter-analytics/
 
 ---
 
-## Getting Started
+## Installation
 
-### Prerequisites
+You can run the project **with Docker** (app + PostgreSQL + Redis in containers) or **without Docker** (Node.js, PostgreSQL, and Redis installed on your machine).
 
-- **Node.js** 20+ (for local run)
-- **PostgreSQL** 16 and **Redis** 7 (for local run)
-- **Docker** and **Docker Compose** (for containerized run)
+---
 
-### Option 1: Run with Docker (recommended)
+### Installation with Docker
 
-Runs app + PostgreSQL + Redis; config from `.env`.
+Runs the app, PostgreSQL, and Redis in containers. No need to install Node.js, PostgreSQL, or Redis locally.
 
-```bash
-# Clone and enter project
-git clone <repo-url>
-cd rate-limiter-analytics
+**Prerequisites**
 
-# Copy env and edit if needed (PORT, DB_USER, DB_PASSWORD, DB_NAME, etc.)
-cp .env.example .env
+- [Docker](https://docs.docker.com/get-docker/) (Desktop or Engine)
+- [Docker Compose](https://docs.docker.com/compose/install/) (v2+)
 
-# Build and start (migrations run automatically on app start)
-docker compose up -d
+**Steps**
 
-# Optional: rebuild after code changes
-docker compose up -d --build
-```
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd rate-limiter-analytics
+   ```
 
-- **App:** http://localhost:3000 (or `PORT` from `.env`)
-- **Dashboard:** http://localhost:3000/dashboard
-- **Stop:** `docker compose down`
+2. **Create environment file**
+   ```bash
+   cp .env.example .env
+   ```
+   Edit `.env` if you want to change `PORT`, `DB_USER`, `DB_PASSWORD`, or `DB_NAME`. Defaults work as-is.
 
-### Option 2: Run locally
+3. **Build and start all services**
+   ```bash
+   docker compose up -d
+   ```
+   This builds the app image and starts the app, PostgreSQL, and Redis. Migrations run automatically on first start.
 
-```bash
-# Install dependencies
-npm install
+4. **Verify**
+   - App: http://localhost:3000 (or the `PORT` in `.env`)
+   - Dashboard: http://localhost:3000/dashboard
+   - Health: http://localhost:3000/health
 
-# Copy env and set DB/Redis to your local instances
-cp .env.example .env
-# Edit .env: DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, REDIS_HOST, REDIS_PORT
+**Useful commands**
 
-# Run migrations (and seed if table is empty)
-npm run migrate
+| Command | Description |
+|---------|-------------|
+| `docker compose up -d` | Start all services in the background |
+| `docker compose up -d --build` | Rebuild app image and start (use after code changes or `git pull`) |
+| `docker compose down` | Stop and remove containers |
+| `docker compose logs -f app` | Follow app logs |
 
-# Start server
-npm run dev
-```
+---
 
-- **App:** http://localhost:3000
-- **Dashboard:** http://localhost:3000/dashboard
+### Installation without Docker
+
+Run the Node.js app on your machine and connect to your own PostgreSQL and Redis instances.
+
+**Prerequisites**
+
+- [Node.js](https://nodejs.org/) 20 or later
+- [PostgreSQL](https://www.postgresql.org/download/) 16 (or compatible)
+- [Redis](https://redis.io/download) 7 (or compatible)
+
+**Steps**
+
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd rate-limiter-analytics
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Create and configure environment**
+   ```bash
+   cp .env.example .env
+   ```
+   Edit `.env` and set:
+   - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` — your PostgreSQL connection
+   - `REDIS_HOST`, `REDIS_PORT` — your Redis connection  
+   Leave as `localhost` and default ports if PostgreSQL and Redis run locally.
+
+4. **Create the database** (if it does not exist)
+   ```bash
+   createdb -U postgres rate_limiters_db
+   ```
+   Or in `psql`: `CREATE DATABASE rate_limiters_db;`  
+   Use the same name as `DB_NAME` in `.env`.
+
+5. **Run migrations**
+   ```bash
+   npm run migrate
+   ```
+   This creates the `request_logs` table and runs the one-time seed (dummy data) when the table is empty.
+
+6. **Start the server**
+   ```bash
+   npm run dev
+   ```
+   Or for production: `npm start`
+
+7. **Verify**
+   - App: http://localhost:3000
+   - Dashboard: http://localhost:3000/dashboard
+   - Health: http://localhost:3000/health
+
+**Useful commands**
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start with nodemon (auto-restart on file changes) |
+| `npm start` | Start production server |
+| `npm run migrate` | Run database migrations |
+| `npm run rollback` | Rollback last migration batch |
 
 ---
 
