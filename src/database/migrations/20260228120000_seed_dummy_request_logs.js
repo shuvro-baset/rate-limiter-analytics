@@ -1,6 +1,14 @@
 /**
  * One-time seed: insert dummy request_logs for multiple browsers and algorithms
  * when the table is empty (first install/run). Safe to run multiple times.
+ *
+ * Purpose: Populate the dashboard with sample data so charts and KPIs are visible
+ * without generating real traffic. Rows use request_id prefix "seed-" so they can
+ * be removed in down() without affecting real logs.
+ *
+ * Data: ALGORITHMS × BROWSERS × OS_LIST × 3 requests per combination; created_at
+ * spread over recent hours for hourly chart. All algorithm_type and browser_name
+ * values match the app's routes and UAParser output.
  */
 
 const ALGORITHMS = [

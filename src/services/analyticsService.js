@@ -1,15 +1,48 @@
+/**
+ * @file analyticsService.js
+ * @description Data access for analytics: aggregates over request_logs (counts, groups by browser,
+ *              algorithm, hour). All methods accept an optional algorithm filter to restrict to one algorithm_type.
+ *
+ * Why parameterized queries:
+ * - algorithm is injected via $1 to avoid SQL injection; _algorithmFilter and _params keep the pattern consistent.
+ *
+ * Return shapes:
+ * - getOverallStats: { total_requests: string, unique_ips: string } (bigint as string for JS).
+ * - getBrowserStats / getAlgorithmStats: [{ browser|algorithm, total }, ...].
+ * - getHourlyStats: [{ hour, total }, ...].
+ * - getAlgorithmDetails: { overall, browsers, hourly, algorithm }.
+ *
+ * @module services/analyticsService
+ */
+
 const pool = require("../config/db");
 
 class AnalyticsService {
+  /**
+   * Builds WHERE clause for algorithm_type when algorithm is provided.
+   * @private
+   * @param {string|null} algorithm
+   * @returns {string} "" or "WHERE algorithm_type = $1"
+   */
   static _algorithmFilter(algorithm) {
     return algorithm ? "WHERE algorithm_type = $1" : "";
   }
 
+  /**
+   * Returns query params array for the algorithm filter (for pg).
+   * @private
+   * @param {string|null} algorithm
+   * @returns {string[]}
+   */
   static _params(algorithm) {
     return algorithm ? [algorithm] : [];
   }
 
-  // Overall request count (optional algorithm filter)
+  /**
+   * Total request count and distinct IP count, optionally for one algorithm.
+   * @param {string|null} [algorithm=null] - If set, only rows with this algorithm_type are counted.
+   * @returns {Promise<{ total_requests: string, unique_ips: string }>}
+   */
   static async getOverallStats(algorithm = null) {
     const where = this._algorithmFilter(algorithm);
     const { rows } = await pool.query(
@@ -29,7 +62,11 @@ class AnalyticsService {
     };
   }
 
-  // Browser wise count (optional algorithm filter)
+  /**
+   * Request count grouped by browser_name. COALESCE(browser_name, 'Unknown') for nulls.
+   * @param {string|null} [algorithm=null] - If set, filter by algorithm_type.
+   * @returns {Promise<Array<{ browser: string, total: number }>>}
+   */
   static async getBrowserStats(algorithm = null) {
     const where = this._algorithmFilter(algorithm);
     const { rows } = await pool.query(
@@ -48,7 +85,10 @@ class AnalyticsService {
     return rows.map((r) => ({ browser: r.browser, total: Number(r.total) }));
   }
 
-  // Algorithm wise count
+  /**
+   * Request count grouped by algorithm_type. No filter param (all algorithms).
+   * @returns {Promise<Array<{ algorithm: string, total: number }>>}
+   */
   static async getAlgorithmStats() {
     const { rows } = await pool.query(`
       SELECT 
@@ -62,7 +102,11 @@ class AnalyticsService {
     return rows.map((r) => ({ algorithm: r.algorithm, total: Number(r.total) }));
   }
 
-  // Requests per hour (optional algorithm filter)
+  /**
+   * Request count per hour (DATE_TRUNC('hour', created_at)), optionally for one algorithm.
+   * @param {string|null} [algorithm=null] - If set, filter by algorithm_type.
+   * @returns {Promise<Array<{ hour: any, total: number }>>}
+   */
   static async getHourlyStats(algorithm = null) {
     const where = this._algorithmFilter(algorithm);
     const { rows } = await pool.query(
@@ -84,7 +128,11 @@ class AnalyticsService {
     }));
   }
 
-  // Full algorithm-specific analytics (overall, browsers, hourly)
+  /**
+   * Full analytics for one algorithm: overall stats, browser stats, and hourly stats in one response.
+   * @param {string} algorithm - algorithm_type value (e.g. "fixed", "token-bucket").
+   * @returns {Promise<{ overall: object, browsers: array, hourly: array, algorithm: string }>}
+   */
   static async getAlgorithmDetails(algorithm) {
     const [overall, browsers, hourly] = await Promise.all([
       this.getOverallStats(algorithm),

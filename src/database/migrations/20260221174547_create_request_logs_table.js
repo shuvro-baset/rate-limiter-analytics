@@ -1,3 +1,9 @@
+/**
+ * Creates the request_logs table used by the analytics middleware and dashboard.
+ * Columns: id, request_id, ip_address, browser_name, os, route, method, algorithm_type,
+ * status_code, response_time_ms, user_agent, created_at. Indexes on request_id, ip_address,
+ * browser_name, algorithm_type, created_at for fast aggregations.
+ */
 exports.up = function (knex) {
   return knex.schema.createTable("request_logs", (table) => {
     table.bigIncrements("id").primary();

@@ -1,3 +1,6 @@
+# Production multi-stage build for rate-limiter-analytics.
+# Stage 1: install production deps only. Stage 2: copy app and run as non-root.
+# Migrations run on container start (CMD); ensure Postgres/Redis are ready via docker-compose depends_on.
 # ------------------------------
 # Stage 1: Dependencies
 # ------------------------------

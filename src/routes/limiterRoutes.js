@@ -1,3 +1,19 @@
+/**
+ * @file limiterRoutes.js
+ * @description Rate-limited demo routes. Each route uses a different algorithm and the analytics
+ *              middleware to tag and log requests. Mounted at /api.
+ *
+ * Order per route: rate limiter -> analytics middleware -> handler. The limiter runs first so
+ * rejected requests (429) are not logged as successful; analytics still runs for allowed requests.
+ *
+ * Configuration (tunable in each route):
+ * - Window-based: windowSize (seconds), maxRequests.
+ * - Token bucket: capacity, refillRate (tokens per second).
+ * - Leaky bucket: capacity, leakRate (drops per second).
+ *
+ * @module routes/limiterRoutes
+ */
+
 const express = require("express");
 const router = express.Router();
 
@@ -9,7 +25,6 @@ const leakyBucket = require("../rateLimiters/leakyBucket");
 
 const analytics = require("../middlewares/analyticsMiddleware");
 
-// Fixed Window
 router.get(
   "/fixed",
   fixed({ windowSize: 60, maxRequests: 5 }),
@@ -19,7 +34,6 @@ router.get(
   }
 );
 
-// Sliding Log
 router.get(
   "/sliding-log",
   slidingLog({ windowSize: 60, maxRequests: 5 }),
@@ -29,7 +43,6 @@ router.get(
   }
 );
 
-// Sliding Counter
 router.get(
   "/sliding-counter",
   slidingCounter({ windowSize: 60, maxRequests: 5 }),
@@ -39,7 +52,6 @@ router.get(
   }
 );
 
-// Token Bucket
 router.get(
   "/token-bucket",
   tokenBucket({ capacity: 5, refillRate: 1 }),
@@ -49,7 +61,6 @@ router.get(
   }
 );
 
-// Leaky Bucket
 router.get(
   "/leaky-bucket",
   leakyBucket({ capacity: 5, leakRate: 1 }),

@@ -32,17 +32,17 @@ Use it as a reference implementation for adding rate limiting and analytics to N
 
 ## Tech Stack
 
-| Layer        | Technology |
-|-------------|------------|
-| **Runtime** | Node.js 20 |
-| **Language**| JavaScript (CommonJS) |
-| **Framework** | Express 5 |
-| **Database** | PostgreSQL 16 (with Knex.js for migrations) |
-| **Cache**   | Redis 7 (for rate-limit counters) |
-| **Dashboard** | Vanilla JS, Chart.js, CSS |
-| **Security** | Helmet, CORS, compression |
-| **Dev**     | Nodemon, Knex CLI |
-| **Deploy**  | Docker, Docker Compose (multi-container) |
+| Layer         | Technology                                  |
+| ------------- | ------------------------------------------- |
+| **Runtime**   | Node.js 20                                  |
+| **Language**  | JavaScript (CommonJS)                       |
+| **Framework** | Express 5                                   |
+| **Database**  | PostgreSQL 16 (with Knex.js for migrations) |
+| **Cache**     | Redis 7 (for rate-limit counters)           |
+| **Dashboard** | Vanilla JS, Chart.js, CSS                   |
+| **Security**  | Helmet, CORS, compression                   |
+| **Dev**       | Nodemon, Knex CLI                           |
+| **Deploy**    | Docker, Docker Compose (multi-container)    |
 
 ---
 
@@ -50,13 +50,13 @@ Use it as a reference implementation for adding rate limiting and analytics to N
 
 ### Rate limiting algorithms
 
-| Algorithm | Route | Description |
-|-----------|--------|-------------|
-| **Fixed Window** | `GET /api/fixed` | Counts requests in fixed time windows (e.g. per minute). Simple; can allow bursts at window boundaries. |
-| **Sliding Log** | `GET /api/sliding-log` | Stores timestamp of each request; precise but memory-heavy. |
-| **Sliding Counter** | `GET /api/sliding-counter` | Hybrid: approximates sliding window with two fixed windows. Good balance of accuracy and memory. |
-| **Token Bucket** | `GET /api/token-bucket` | Tokens refill at a rate; allows bursts up to bucket capacity. |
-| **Leaky Bucket** | `GET /api/leaky-bucket` | Requests leave the “bucket” at a steady rate; smooths traffic. |
+| Algorithm           | Route                      | Description                                                                                             |
+| ------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Fixed Window**    | `GET /api/fixed`           | Counts requests in fixed time windows (e.g. per minute). Simple; can allow bursts at window boundaries. |
+| **Sliding Log**     | `GET /api/sliding-log`     | Stores timestamp of each request; precise but memory-heavy.                                             |
+| **Sliding Counter** | `GET /api/sliding-counter` | Hybrid: approximates sliding window with two fixed windows. Good balance of accuracy and memory.        |
+| **Token Bucket**    | `GET /api/token-bucket`    | Tokens refill at a rate; allows bursts up to bucket capacity.                                           |
+| **Leaky Bucket**    | `GET /api/leaky-bucket`    | Requests leave the “bucket” at a steady rate; smooths traffic.                                          |
 
 - All algorithm endpoints are **logged** (IP, browser, OS, route, algorithm, status, response time) for analytics.
 - A **global rate limiter** (Redis) applies to `/api/*` routes (configurable limit/window).
@@ -84,34 +84,34 @@ Base URL: `http://localhost:3000` (or your `PORT`).
 
 ### Health
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/health` | Returns `{ status: "OK", request_id: "<uuid>" }`. |
+| Method | Endpoint  | Description                                       |
+| ------ | --------- | ------------------------------------------------- |
+| `GET`  | `/health` | Returns `{ status: "OK", request_id: "<uuid>" }`. |
 
 ### Rate-limited APIs (under `/api`)
 
 Each endpoint uses the algorithm in the route name and returns `429` when the limit is exceeded.
 
-| Method | Endpoint | Algorithm | Success (200) | Rate limited (429) |
-|--------|----------|-----------|----------------|--------------------|
-| `GET` | `/api/fixed` | Fixed Window | `{ "message": "Fixed Window Success" }` | `{ "message": "Rate limit exceeded" }` |
-| `GET` | `/api/sliding-log` | Sliding Log | `{ "message": "Sliding Log Success" }` | same |
-| `GET` | `/api/sliding-counter` | Sliding Counter | `{ "message": "Sliding Counter Success" }` | same |
-| `GET` | `/api/token-bucket` | Token Bucket | `{ "message": "Token Bucket Success" }` | same |
-| `GET` | `/api/leaky-bucket` | Leaky Bucket | `{ "message": "Leaky Bucket Success" }` | same |
+| Method | Endpoint               | Algorithm       | Success (200)                              | Rate limited (429)                     |
+| ------ | ---------------------- | --------------- | ------------------------------------------ | -------------------------------------- |
+| `GET`  | `/api/fixed`           | Fixed Window    | `{ "message": "Fixed Window Success" }`    | `{ "message": "Rate limit exceeded" }` |
+| `GET`  | `/api/sliding-log`     | Sliding Log     | `{ "message": "Sliding Log Success" }`     | same                                   |
+| `GET`  | `/api/sliding-counter` | Sliding Counter | `{ "message": "Sliding Counter Success" }` | same                                   |
+| `GET`  | `/api/token-bucket`    | Token Bucket    | `{ "message": "Token Bucket Success" }`    | same                                   |
+| `GET`  | `/api/leaky-bucket`    | Leaky Bucket    | `{ "message": "Leaky Bucket Success" }`    | same                                   |
 
 ### Analytics API (under `/analytics`)
 
 All analytics endpoints return JSON. Optional query: `?algorithm=<name>` to filter by algorithm (e.g. `fixed`, `token-bucket`).
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/analytics/ping` | No DB. Returns `{ "ok": true }`. Use to check server reachability. |
-| `GET` | `/analytics/overall` | `{ "total_requests": "<count>", "unique_ips": "<count>" }`. |
-| `GET` | `/analytics/browsers` | `[{ "browser": "<name>", "total": <n> }, ...]`. |
-| `GET` | `/analytics/algorithms` | `[{ "algorithm": "<name>", "total": <n> }, ...]`. |
-| `GET` | `/analytics/hourly` | `[{ "hour": "<ISO date>", "total": <n> }, ...]`. |
-| `GET` | `/analytics/algorithm/:name` | Full stats for one algorithm: `{ "overall", "browsers", "hourly", "algorithm" }`. |
+| Method | Endpoint                     | Description                                                                       |
+| ------ | ---------------------------- | --------------------------------------------------------------------------------- |
+| `GET`  | `/analytics/ping`            | No DB. Returns `{ "ok": true }`. Use to check server reachability.                |
+| `GET`  | `/analytics/overall`         | `{ "total_requests": "<count>", "unique_ips": "<count>" }`.                       |
+| `GET`  | `/analytics/browsers`        | `[{ "browser": "<name>", "total": <n> }, ...]`.                                   |
+| `GET`  | `/analytics/algorithms`      | `[{ "algorithm": "<name>", "total": <n> }, ...]`.                                 |
+| `GET`  | `/analytics/hourly`          | `[{ "hour": "<ISO date>", "total": <n> }, ...]`.                                  |
+| `GET`  | `/analytics/algorithm/:name` | Full stats for one algorithm: `{ "overall", "browsers", "hourly", "algorithm" }`. |
 
 ---
 
@@ -175,21 +175,26 @@ Runs the app, PostgreSQL, and Redis in containers. No need to install Node.js, P
 **Steps**
 
 1. **Clone the repository**
+
    ```bash
    git clone <your-repo-url>
    cd rate-limiter-analytics
    ```
 
 2. **Create environment file**
+
    ```bash
    cp .env.example .env
    ```
+
    Edit `.env` if you want to change `PORT`, `DB_USER`, `DB_PASSWORD`, or `DB_NAME`. Defaults work as-is.
 
 3. **Build and start all services**
+
    ```bash
    docker compose up -d
    ```
+
    This builds the app image and starts the app, PostgreSQL, and Redis. Migrations run automatically on first start.
 
 4. **Verify**
@@ -199,12 +204,12 @@ Runs the app, PostgreSQL, and Redis in containers. No need to install Node.js, P
 
 **Useful commands**
 
-| Command | Description |
-|---------|-------------|
-| `docker compose up -d` | Start all services in the background |
+| Command                        | Description                                                        |
+| ------------------------------ | ------------------------------------------------------------------ |
+| `docker compose up -d`         | Start all services in the background                               |
 | `docker compose up -d --build` | Rebuild app image and start (use after code changes or `git pull`) |
-| `docker compose down` | Stop and remove containers |
-| `docker compose logs -f app` | Follow app logs |
+| `docker compose down`          | Stop and remove containers                                         |
+| `docker compose logs -f app`   | Follow app logs                                                    |
 
 ---
 
@@ -221,42 +226,52 @@ Run the Node.js app on your machine and connect to your own PostgreSQL and Redis
 **Steps**
 
 1. **Clone the repository**
+
    ```bash
    git clone <your-repo-url>
    cd rate-limiter-analytics
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Create and configure environment**
+
    ```bash
    cp .env.example .env
    ```
+
    Edit `.env` and set:
    - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` — your PostgreSQL connection
    - `REDIS_HOST`, `REDIS_PORT` — your Redis connection  
-   Leave as `localhost` and default ports if PostgreSQL and Redis run locally.
+     Leave as `localhost` and default ports if PostgreSQL and Redis run locally.
 
 4. **Create the database** (if it does not exist)
+
    ```bash
    createdb -U postgres rate_limiters_db
    ```
+
    Or in `psql`: `CREATE DATABASE rate_limiters_db;`  
    Use the same name as `DB_NAME` in `.env`.
 
 5. **Run migrations**
+
    ```bash
    npm run migrate
    ```
+
    This creates the `request_logs` table and runs the one-time seed (dummy data) when the table is empty.
 
 6. **Start the server**
+
    ```bash
    npm run dev
    ```
+
    Or for production: `npm start`
 
 7. **Verify**
@@ -266,12 +281,12 @@ Run the Node.js app on your machine and connect to your own PostgreSQL and Redis
 
 **Useful commands**
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start with nodemon (auto-restart on file changes) |
-| `npm start` | Start production server |
-| `npm run migrate` | Run database migrations |
-| `npm run rollback` | Rollback last migration batch |
+| Command            | Description                                       |
+| ------------------ | ------------------------------------------------- |
+| `npm run dev`      | Start with nodemon (auto-restart on file changes) |
+| `npm start`        | Start production server                           |
+| `npm run migrate`  | Run database migrations                           |
+| `npm run rollback` | Rollback last migration batch                     |
 
 ---
 
@@ -279,18 +294,18 @@ Run the Node.js app on your machine and connect to your own PostgreSQL and Redis
 
 Copy `.env.example` to `.env` and adjust as needed.
 
-| Variable | Description | Default (example) |
-|----------|-------------|--------------------|
-| `PORT` | HTTP server port | `3000` |
-| `NODE_ENV` | `development` or `production` | — |
-| `DB_HOST` | PostgreSQL host | `localhost` (Docker: `postgres`) |
-| `DB_PORT` | PostgreSQL port | `5432` |
-| `DB_USER` | PostgreSQL user | `postgres` |
-| `DB_PASSWORD` | PostgreSQL password | — |
-| `DB_NAME` | PostgreSQL database name | `rate_limiters_db` |
-| `REDIS_HOST` | Redis host | `localhost` (Docker: `redis`) |
-| `REDIS_PORT` | Redis port | `6379` |
-| `REDIS_URL` | Redis URL (for rate limiters) | `redis://localhost:6379` |
+| Variable      | Description                   | Default (example)                |
+| ------------- | ----------------------------- | -------------------------------- |
+| `PORT`        | HTTP server port              | `3000`                           |
+| `NODE_ENV`    | `development` or `production` | —                                |
+| `DB_HOST`     | PostgreSQL host               | `localhost` (Docker: `postgres`) |
+| `DB_PORT`     | PostgreSQL port               | `5432`                           |
+| `DB_USER`     | PostgreSQL user               | `postgres`                       |
+| `DB_PASSWORD` | PostgreSQL password           | —                                |
+| `DB_NAME`     | PostgreSQL database name      | `rate_limiters_db`               |
+| `REDIS_HOST`  | Redis host                    | `localhost` (Docker: `redis`)    |
+| `REDIS_PORT`  | Redis port                    | `6379`                           |
+| `REDIS_URL`   | Redis URL (for rate limiters) | `redis://localhost:6379`         |
 
 Docker Compose reads `PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_PORT`, `REDIS_PORT` from `.env` for port mapping and service config.
 

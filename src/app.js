@@ -1,3 +1,16 @@
+/**
+ * @file app.js
+ * @description Express application factory. Configures security, CORS, compression, body parsing,
+ *              and mounts all routes. Dashboard and analytics routes are registered before
+ *              the global rate limiter so they remain available even if Redis is down.
+ *
+ * Route order rationale:
+ * - Health, analytics, and dashboard are mounted first so they do not depend on rate limiter or Redis.
+ * - Request ID, logger, global rate limiter, and analytics logging run for all subsequent routes (e.g. /api).
+ *
+ * @module app
+ */
+
 const express = require("express");
 const path = require("path");
 const helmet = require("helmet");
@@ -8,25 +21,24 @@ const requestId = require("./middlewares/requestId");
 const loggerMiddleware = require("./middlewares/loggerMiddleware");
 const globalRateLimiter = require("./middlewares/globalRateLimiter");
 const analyticsMiddleware = require("./middlewares/analyticsMiddleware");
-const errorHandler = require("./middlewares/errorHandler");
 
-const app = express(); // ✅ IMPORTANT
+const app = express();
 
 // ------------------
 // Core Middlewares
 // ------------------
 app.use(
   helmet({
-    contentSecurityPolicy: false,
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-    crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: false,           // Allow CDN scripts (e.g. Chart.js) and inline styles
+    crossOriginResourcePolicy: { policy: "cross-origin" },  // Allow dashboard to load assets
+    crossOriginEmbedderPolicy: false,      // Avoid blocking same-origin responses
   })
 );
 app.use(cors());
 app.use(compression());
 
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 
 // ------------------
 // Routes (dashboard + analytics first so they don't depend on rate limiter/Redis)
